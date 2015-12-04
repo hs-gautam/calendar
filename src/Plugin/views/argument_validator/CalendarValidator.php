@@ -73,6 +73,7 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
       case 'week':
         return 'F j, Y';
       case 'day':
+        return 'l, F j, Y';
       default:
         // @todo Load format used for medium here
         return 'F j, Y';

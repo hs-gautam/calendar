@@ -245,6 +245,31 @@ display:
         title: Calendar
         description: ''
         weight: 0
+      header:
+        calendar_header_1:
+          id: calendar_header_1
+          table: views
+          field: calendar_header
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: 1
+          content: '{{ arguments.created_year_month }}'
+          pager_embed: 0
+          plugin_id: calendar_header
+        calendar_header:
+          id: calendar_header
+          table: views
+          field: calendar_header
+          relationship: none
+          group_type: group
+          admin_label: 'Calendar Pager'
+          empty: true
+          tokenize: 1
+          content: ''
+          pager_embed: 1
+          plugin_id: calendar_header
       arguments:
         __FIELD_ID_year_month:
           id: __FIELD_ID_year_month
@@ -272,15 +297,17 @@ display:
             sort_order: asc
             number_of_records: 0
             format: default_summary
-          specify_validation: false
+          specify_validation: true
           validate:
-            type: none
+            type: calendar
             fail: 'not found'
-          validate_options: {  }
+          validate_options:
+            replacement_format: 'F Y'
           entity_type: __ENTITY_TYPE
           plugin_id: date_year_month
       defaults:
         arguments: false
+        header: false
     cache_metadata:
       max-age: -1
       contexts:
@@ -317,6 +344,7 @@ display:
         style: false
         row: false
         arguments: false
+        header: false
       row:
         type: calendar_row
         options:
@@ -337,6 +365,31 @@ display:
         weight: 0
         context: '0'
         menu_name: main
+      header:
+        calendar_header_1:
+          id: calendar_header_1
+          table: views
+          field: calendar_header
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: 1
+          content: 'Week of {{ arguments.created_year_week }}'
+          pager_embed: 0
+          plugin_id: calendar_header
+        calendar_header:
+          id: calendar_header
+          table: views
+          field: calendar_header
+          relationship: none
+          group_type: group
+          admin_label: 'Calendar Pager'
+          empty: true
+          tokenize: 1
+          content: ''
+          pager_embed: 1
+          plugin_id: calendar_header
       arguments:
         __FIELD_ID_year_week:
           id: __FIELD_ID_year_week
@@ -364,11 +417,12 @@ display:
             sort_order: asc
             number_of_records: 0
             format: default_summary
-          specify_validation: false
+          specify_validation: true
           validate:
-            type: none
+            type: calendar
             fail: 'not found'
-          validate_options: {  }
+          validate_options:
+            replacement_format: 'F j, Y'
           entity_type: __ENTITY_TYPE
           plugin_id: date_year_week
     cache_metadata:
@@ -407,6 +461,7 @@ display:
         style: false
         row: false
         arguments: false
+        header: false
       row:
         type: calendar_row
         options:
@@ -427,6 +482,31 @@ display:
         weight: 0
         context: '0'
         menu_name: main
+      header:
+        calendar_header_1:
+          id: calendar_header_1
+          table: views
+          field: calendar_header
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: 1
+          content: '{{ arguments.created__fulldate }}'
+          pager_embed: 0
+          plugin_id: calendar_header
+        calendar_header:
+          id: calendar_header
+          table: views
+          field: calendar_header
+          relationship: none
+          group_type: group
+          admin_label: 'Calendar Pager'
+          empty: true
+          tokenize: 1
+          content: ''
+          pager_embed: 1
+          plugin_id: calendar_header
       arguments:
          __FIELD_ID__fulldate:
           id:  __FIELD_ID_fulldate
@@ -454,11 +534,12 @@ display:
             sort_order: asc
             number_of_records: 0
             format: default_summary
-          specify_validation: false
+          specify_validation: true
           validate:
-            type: none
+            type: calendar
             fail: 'not found'
-          validate_options: {  }
+          validate_options:
+            replacement_format: 'l, F j, Y'
           entity_type: __ENTITY_TYPE
           plugin_id: date_fulldate
     cache_metadata:
@@ -497,6 +578,7 @@ display:
         style: false
         row: false
         arguments: false
+        header: false
       row:
         type: calendar_row
         options:
@@ -507,6 +589,31 @@ display:
               page: '#ffffff'
             taxonomy_field: ''
             calendar_colors_vocabulary: {  }
+      header:
+        calendar_header_1:
+          id: calendar_header_1
+          table: views
+          field: calendar_header
+          relationship: none
+          group_type: group
+          admin_label: ''
+          empty: true
+          tokenize: 1
+          content: '{{ arguments.created_year }}'
+          pager_embed: 0
+          plugin_id: calendar_header
+        calendar_header:
+          id: calendar_header
+          table: views
+          field: calendar_header
+          relationship: none
+          group_type: group
+          admin_label: 'Calendar Pager'
+          empty: true
+          tokenize: 1
+          content: ''
+          pager_embed: 1
+          plugin_id: calendar_header
       arguments:
         __FIELD_ID_year:
           id: __FIELD_ID_year
@@ -534,11 +641,12 @@ display:
             sort_order: asc
             number_of_records: 0
             format: default_summary
-          specify_validation: false
+          specify_validation: true
           validate:
-            type: none
+            type: calendar
             fail: 'not found'
-          validate_options: {  }
+          validate_options:
+            replacement_format: 'Y'
           entity_type: __ENTITY_TYPE
           plugin_id: date_year
       path: __BASE_PATH/year

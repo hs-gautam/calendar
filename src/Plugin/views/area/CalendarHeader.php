@@ -26,9 +26,9 @@ class CalendarHeader extends TokenizeAreaPluginBase {
   protected function defineOptions() {
     $options = parent::defineOptions();
     // Override defaults to from parent.
-    //$options['tokenize']['default'] = TRUE;
-    //$options['empty']['default'] = TRUE;
-    // Provide our own default.
+    $options['tokenize']['default'] = TRUE;
+    $options['empty']['default'] = TRUE;
+    // Provide our own defaults.
     $options['content'] = array('default' => '');
     $options['pager_embed'] = array('default' => FALSE);
     return $options;
@@ -42,9 +42,8 @@ class CalendarHeader extends TokenizeAreaPluginBase {
 
     $form['content'] = array(
       '#title' => $this->t('Heading'),
-      '#type' => 'textarea',
+      '#type' => 'textfield',
       '#default_value' => $this->options['content'],
-      '#rows' => 6,
     );
     $form['pager_embed'] = array(
       '#title' => $this->t('Use Pager'),
@@ -63,7 +62,7 @@ class CalendarHeader extends TokenizeAreaPluginBase {
       $argument = CalendarHelper::getDateArgumentHandler($this->view);
 
       $render = [];
-      $header_text = $this->renderTextArea($this->options['content']);
+      $header_text = $this->renderTextField($this->options['content']);
 
       if (!$this->options['pager_embed']) {
         $render = array(
@@ -92,7 +91,7 @@ class CalendarHeader extends TokenizeAreaPluginBase {
   /**
    * Render a text area with \Drupal\Component\Utility\Xss::filterAdmin().
    */
-  public function renderTextArea($value) {
+  public function renderTextField($value) {
     if ($value) {
       return $this->sanitizeValue($this->tokenizeValue($value), 'xss_admin');
     }
