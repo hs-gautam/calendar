@@ -720,4 +720,91 @@ class CalendarHelper extends DateHelper {
     }
     return FALSE;
   }
+
+  /**
+   * Limits a date format to include only elements from a given granularity array.
+   *
+   * Example:
+   *   DateGranularity::limitFormat('F j, Y - H:i', array('year', 'month', 'day'));
+   *   returns 'F j, Y'
+   *
+   * @param string $format
+   *   A date format string.
+   * @param array $array
+   *   An array of allowed date parts, all others will be removed.
+   *
+   * @return string
+   *   The format string with all other elements removed.
+   */
+  public static function limitFormat($format, $array) {
+    // If punctuation has been escaped, remove the escaping. Done using strtr()
+    // because it is easier than getting the escape character extracted using
+    // preg_replace().
+    $replace = array(
+      '\-' => '-',
+      '\:' => ':',
+      "\'" => "'",
+      '\. ' => ' . ',
+      '\,' => ',',
+    );
+    $format = strtr($format, $replace);
+
+    $format = str_replace('\T', ' ', $format);
+    $format = str_replace('T', ' ', $format);
+
+    $regex = array();
+    // Create regular expressions to remove selected values from string.
+    // Use (?<!\\\\) to keep escaped letters from being removed.
+    foreach ($array as $element) {
+      switch ($element) {
+        case 'year':
+          $regex[] = '([\-/\.,:]?\s?(?<!\\\\)[Yy])';
+          break;
+        case 'day':
+          $regex[] = '([\-/\.,:]?\s?(?<!\\\\)[l|D|d|dS|j|jS|N|w|W|z]{1,2})';
+          break;
+        case 'month':
+          $regex[] = '([\-/\.,:]?\s?(?<!\\\\)[FMmn])';
+          break;
+        case 'hour':
+          $regex[] = '([\-/\.,:]?\s?(?<!\\\\)[HhGg])';
+          break;
+        case 'minute':
+          $regex[] = '([\-/\.,:]?\s?(?<!\\\\)[i])';
+          break;
+        case 'second':
+          $regex[] = '([\-/\.,:]?\s?(?<!\\\\)[s])';
+          break;
+        case 'timezone':
+          $regex[] = '([\-/\.,:]?\s?(?<!\\\\)[TOZPe])';
+          break;
+
+      }
+    }
+    // Remove empty parentheses, brackets, pipes.
+    $regex[] = '(\(\))';
+    $regex[] = '(\[\])';
+    $regex[] = '(\|\|)';
+
+    // Remove selected values from string.
+    $format = trim(preg_replace($regex, array(), $format));
+    // Remove orphaned punctuation at the beginning of the string.
+    $format = preg_replace('`^([\-/\.,:\'])`', '', $format);
+    // Remove orphaned punctuation at the end of the string.
+    $format = preg_replace('([\-/,:\']$)', '', $format);
+    $format = preg_replace('(\\$)', '', $format);
+
+    // Trim any whitespace from the result.
+    $format = trim($format);
+
+    // After removing the non-desired parts of the format, test if the only things
+    // left are escaped, non-date, characters. If so, return nothing.
+    // Using S instead of w to pick up non-ASCII characters.
+    $test = trim(preg_replace('(\\\\\S{1,3})', '', $format));
+    if (empty($test)) {
+      $format = '';
+    }
+
+    return $format;
+  }
 }

@@ -4,6 +4,7 @@
  * @file
  * Theme functions for the Calendar module.
  */
+use Drupal\calendar\CalendarHelper;
 use Drupal\Component\Datetime\DateTimePlus;
 use Drupal\Core\Datetime\Entity\DateFormat;
 use Drupal\Core\Url;
@@ -153,7 +154,7 @@ function template_preprocess_calendar_day(&$vars) {
   /** @var \Drupal\calendar\CalendarStyleInfo $styleInfo */
   $styleInfo = $view->styleInfo;
   $grouping_field = !empty($styleInfo->getCustomGroupByField()) ? ($styleInfo->getCustomGroupByField()) : NULL;
-  $display_overlap = !empty($styleInfo->getThemeStyle()) && !empty($styleInfo->getCustomGroupByTimes());
+  $display_overlap = !empty($styleInfo->getThemeStyle()) && !empty($styleInfo->getGroupByTimes());
   $vars['scroll_content'] = !empty($styleInfo->getThemeStyle()) && $styleInfo->getThemeStyle() == 1;
 
   // Add optional css
@@ -699,9 +700,19 @@ function template_preprocess_calendar_time_row_heading($vars) {
     else {
       $limit = ['hour', 'minute'];
     }
-    // TODO find date_limit_format() replacement
-//    $format_hour = str_replace(array('a', 'A'), '', date_limit_format($format, $limit));
-    $format_hour = str_replace(['a', 'A'], '', $format, $limit);
+
+    $granularities = [
+      'year',
+      'month',
+      'day',
+      'hour',
+      'minute',
+      'second',
+      'timezone',
+    ];
+    $reversedLimit = array_diff($granularities, $limit);
+
+    $format_hour = str_replace(['a', 'A'], '', CalendarHelper::limitFormat($format, $reversedLimit));
     $format_ampm = strstr($format, 'a') ? 'a' : (strstr($format, 'A') ? 'A' : '');
   }
   if ($start_time == '00:00:00' && $next_start_time == '23:59:59') {
