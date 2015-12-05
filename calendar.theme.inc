@@ -135,10 +135,6 @@ function template_preprocess_calendar_year(&$vars) {
  */
 function template_preprocess_calendar_day_overlap(&$vars) {
   template_preprocess_calendar_day($vars);
-
-  if (!$vars['view']->live_preview && !empty($vars['scroll_content'])) {
-    $vars['#attached']['library'][] = 'calendar/calendar.overlap';
-  }
 }
 
 /**
@@ -157,28 +153,14 @@ function template_preprocess_calendar_day(&$vars) {
   $display_overlap = !empty($styleInfo->getThemeStyle()) && !empty($styleInfo->getGroupByTimes());
   $vars['scroll_content'] = !empty($styleInfo->getThemeStyle()) && $styleInfo->getThemeStyle() == 1;
 
-  // Add optional css
   if ($display_overlap) {
     $overlapped_items = [];
-    // @FIXME
-// The Assets API has totally changed. CSS, JavaScript, and libraries are now
-// attached directly to render arrays using the #attached property.
-//
-//
-// @see https://www.drupal.org/node/2169605
-// @see https://www.drupal.org/node/2408597
-// drupal_add_css(drupal_get_path('module', 'calendar') . '/css/calendar-overlap.css');
-
+    $vars['#attached']['library'][] = 'calendar/calendar.overlapcss';
+    if ((empty($vars['view']->live_preview) || !$vars['view']->live_preview) && !empty($vars['scroll_content'])) {
+      $vars['#attached']['library'][] = 'calendar/calendar.overlapjs';
+    }
     if (empty($vars['scroll_content'])) {
-      // @FIXME
-// The Assets API has totally changed. CSS, JavaScript, and libraries are now
-// attached directly to render arrays using the #attached property.
-//
-//
-// @see https://www.drupal.org/node/2169605
-// @see https://www.drupal.org/node/2408597
-// drupal_add_css(drupal_get_path('module', 'calendar') . '/css/calendar-overlap-no-scroll.css');
-
+      $vars['#attached']['library'][] = 'calendar/calendar.noscroll';
     }
   }
 
@@ -250,7 +232,7 @@ function template_preprocess_calendar_day(&$vars) {
       }
       $grouped_items[$start_time]['values'][$column][] = $item;
       if ($display_overlap) {
-        $time_end = date_format($item->calendar_end_date, 'H:i:s');
+        $time_end = date_format($item->getEndDate(), 'H:i:s');
         $item->time_start = $time;
         $item->time_end = $time_end;
         _calc_indents($overlapped_items, $time, $time_end, $item);
@@ -296,11 +278,11 @@ function template_preprocess_calendar_day(&$vars) {
         $group_time = NULL;
         $divisor = NULL;
         if ($display_overlap) {
-          if ($view->style_options['groupby_times'] == 'half') {
+          if ($view->styleInfo->getGroupByTimes() == 'half') {
             $group_time = 30;
             $divisor = 7.5;
           }
-          elseif ($view->style_options['groupby_times'] == 'hour') {
+          elseif ($view->styleInfo->getGroupByTimes() == 'hour') {
             $group_time = 60;
             $divisor = 15;
           }
@@ -359,10 +341,6 @@ function template_preprocess_calendar_day(&$vars) {
  */
 function template_preprocess_calendar_week_overlap(&$vars) {
   template_preprocess_calendar_week($vars);
-
-  if (!$vars['view']->live_preview && !empty($vars['scroll_content'])) {
-    $vars['#attached']['library'][] = 'calendar/calendar.overlap';
-  }
 }
 
 /**
@@ -403,26 +381,15 @@ function template_preprocess_calendar_week(&$vars) {
 
   // Add optional css
   if ($display_overlap) {
-    // @FIXME
-// The Assets API has totally changed. CSS, JavaScript, and libraries are now
-// attached directly to render arrays using the #attached property.
-//
-//
-// @see https://www.drupal.org/node/2169605
-// @see https://www.drupal.org/node/2408597
-// drupal_add_css(drupal_get_path('module', 'calendar') . '/css/calendar-overlap.css');
 
-    if ($vars['scroll_content']) {
-      // @FIXME
-// The Assets API has totally changed. CSS, JavaScript, and libraries are now
-// attached directly to render arrays using the #attached property.
-//
-//
-// @see https://www.drupal.org/node/2169605
-// @see https://www.drupal.org/node/2408597
-// drupal_add_css(drupal_get_path('module', 'calendar') . '/css/calendar-overlap-no-scroll.css');
-
+    $vars['#attached']['library'][] = 'calendar/calendar.overlapcss';
+    if ((empty($vars['view']->live_preview) || !$vars['view']->live_preview) && !empty($vars['scroll_content'])) {
+      $vars['#attached']['library'][] = 'calendar/calendar.overlapjs';
     }
+    if (empty($vars['scroll_content'])) {
+      $vars['#attached']['library'][] = 'calendar/calendar.noscroll';
+    }
+
     $overlapped_items = [[], [], [], [], [], [], []];
 
     // Locate the first item
