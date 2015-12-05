@@ -544,7 +544,7 @@ class Calendar extends StylePluginBase {
         $rows = $this->calendarBuildDay();
         break;
       case 'week':
-        $rows = $this->calendarBuildWeek(TRUE);
+        $rows = $this->calendarBuildWeek();
         // Merge the day names in as the first row.
         $rows = array_merge([CalendarHelper::weekHeader($this->view)], $rows);
         break;
