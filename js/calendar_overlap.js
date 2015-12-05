@@ -83,13 +83,7 @@
     function calendar_resizeViewport() {
       // Size of the browser window
       var viewportHeight = window.innerHeight ? window.innerHeight : $(window).height();
-
-      // TODO this is called too early, find out why and fix it
-      var top = 0;
-      if (typeof $('#single-day-container') == 'undefined')
-      {
-        top = $('#single-day-container').offset().top;
-      }
+      var top = $('#single-day-container').offset().top;
 
       // Give it a 20 pixel margin at the bottom
       $('#single-day-container').height(viewportHeight - top - 20);

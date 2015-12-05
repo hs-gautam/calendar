@@ -136,7 +136,7 @@ function template_preprocess_calendar_year(&$vars) {
 function template_preprocess_calendar_day_overlap(&$vars) {
   template_preprocess_calendar_day($vars);
 
-  if (!empty($vars['scroll_content'])) {
+  if (!$vars['view']->live_preview && !empty($vars['scroll_content'])) {
     $vars['#attached']['library'][] = 'calendar/calendar.overlap';
   }
 }
@@ -360,7 +360,7 @@ function template_preprocess_calendar_day(&$vars) {
 function template_preprocess_calendar_week_overlap(&$vars) {
   template_preprocess_calendar_week($vars);
 
-  if (!empty($vars['scroll_content'])) {
+  if (!$vars['view']->live_preview && !empty($vars['scroll_content'])) {
     $vars['#attached']['library'][] = 'calendar/calendar.overlap';
   }
 }
