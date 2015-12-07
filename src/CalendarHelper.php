@@ -8,6 +8,7 @@ namespace Drupal\calendar;
 use Datetime;
 use DateTimeZone;
 use Drupal\Core\Datetime\DateHelper;
+use Drupal\Core\Url;
 use Drupal\views\Plugin\views\argument\ArgumentPluginBase;
 use Drupal\views\Plugin\views\filter\Broken;
 use Drupal\views\ViewExecutable;
@@ -696,20 +697,35 @@ class CalendarHelper extends DateHelper {
   /**
    * Helper function to find the first date argument handler for this view.
    *
-   * This function also sets the date argument position into the $dateInfo
-   * object.
+   * @param \Drupal\views\ViewExecutable $view
+   * @param null $display_id
    *
-   * @return DateArgumentWrapper|FALSE
-   *   Returns the Date handler if one is found, or FALSE otherwise.
+   * @return \Drupal\calendar\DateArgumentWrapper|FALSE Returns the Date handler if one is found, or FALSE otherwise.
+   * Returns the Date handler if one is found, or FALSE otherwise.
    */
-  public static function getDateArgumentHandler(ViewExecutable $view) {
-    if ($view->argument) {
+  public static function getDateArgumentHandler(ViewExecutable $view, $display_id = NULL) {
+    $all_arguments = [];
+    if ($display_id) {
+      // If we aren't dealing with current display we have to load the argument handlers.
+      /** @var \Drupal\views\Plugin\ViewsHandlerManager $argument_manager */
+      $argument_manager = \Drupal::getContainer()->get('plugin.manager.views.argument');
+
+      $argument_configs = $view->getHandlers('argument', $display_id);
+      foreach ($argument_configs as $argument_config) {
+        $all_arguments[] = $argument_manager->createInstance($argument_config['plugin_id'], $argument_config);
+      }
+    }
+    else {
+      // $view->argument actually contains an array of current arguments.
+      $all_arguments = $view->argument;
+    }
+    if ($all_arguments) {
       $current_position = 0;
       /**
        * @var  $name
        * @var \Drupal\views\Plugin\views\argument\ArgumentPluginBase $handler
        */
-      foreach ($view->argument as $name => $handler) {
+      foreach ($all_arguments as $name => $handler) {
         if (static::isCalendarArgument($handler)) {
           $wrapper = new DateArgumentWrapper($handler);
           $wrapper->setPosition($current_position);
@@ -806,5 +822,80 @@ class CalendarHelper extends DateHelper {
     }
 
     return $format;
+  }
+
+  /**
+   * Get the display that handles a given granularity.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   * @param $granularity
+   *
+   * @return mixed
+   */
+  static function getDisplayForGranularity(ViewExecutable $view, $granularity) {
+    $displays = &drupal_static(__FUNCTION__, []);
+    $view_name = $view->id();
+    if (!array_key_exists($view_name, $displays) || (isset($displays[$view->id()]) && !(array_key_exists($granularity, $displays[$view->id()])))) {
+      $displays[$view_name][$granularity] = NULL;
+
+      foreach ($view->displayHandlers->getConfiguration() as $id => $display) {
+        $loaded_display = $view->displayHandlers->get($id);
+        if (!$loaded_display || !$view->displayHandlers->get($id)->isEnabled()) {
+          continue;
+        }
+
+        if ($display['display_plugin'] != 'feed' && !empty($display['display_options']['path']) && !empty($display['display_options']['arguments'])) {
+
+          // Set to the default value, reset below if another value is found.
+          $argument = static::getDateArgumentHandler($view, $id);
+
+          if ($argument->getGranularity() == $granularity) {
+
+            $displays[$view->id()][$granularity] = $display['id'];
+          }
+        }
+      }
+    }
+    return $displays[$view->id()][$granularity];
+  }
+
+  /**
+   * Get the Url object that will link to the view for the given granularity and arguments.
+   *
+   * @todo Allow a View to link to other Views by itself for a certain granularity.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   * @param $granularity
+   * @param $arguments
+   *
+   * @return \Drupal\Core\Url|null
+   */
+  static function getURLForGranularity(ViewExecutable $view, $granularity, $arguments) {
+    if ($display_id = static::getDisplayForGranularity($view, $granularity)) {
+      // @todo Handle arguments in different positions
+      // @todo Handle query string parameters.
+      return static::getViewsURL($view, $display_id, $arguments);
+    }
+    return NULL;
+  }
+
+  /**
+   * Get the Url object to link to a View display with given arguments.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   * @param $display_id
+   * @param array $args
+   *
+   * @return \Drupal\Core\Url
+   */
+  static function getViewsURL(ViewExecutable $view, $display_id, $args = []) {
+    $route_parameters = [];
+    $arg_position = 0;
+    foreach ($args as $arg) {
+      $route_parameters['arg_' . $arg_position] = $arg;
+      $arg_position++;
+    }
+    $route_name = 'view.' . $view->id() . '.' . $display_id;
+    return Url::fromRoute($route_name, $route_parameters);
   }
 }

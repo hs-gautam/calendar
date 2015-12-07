@@ -8,7 +8,7 @@
 use Drupal\Core\Url;
 use Drupal\views\ViewExecutable;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\views\Plugin\views\cache\CachePluginBase;
+use Drupal\calendar\CalendarHelper;
 define('CALENDAR_SHOW_ALL', 0);
 define('CALENDAR_HIDE_ALL', -1);
 define('CALENDAR_EMPTY_STRIPE', '#ffffff');
@@ -216,6 +216,8 @@ function calendar_groupby_times($type = '') {
  * @return string
  *   The path for the specific granularity, or an empty string if none was
  *   found.
+ *
+ * @deprecated use \Drupal\calendar\CalendarHelper::getURLForGranularity instead.
  */
 function calendar_granularity_path(ViewExecutable &$view, $granularity) {
   // @todo Find out what should happen here.
@@ -235,13 +237,9 @@ function calendar_granularity_path(ViewExecutable &$view, $granularity) {
 
         // Set to the default value, reset below if another value is found.
         $type = 'month';
-        foreach ($display['display_options']['arguments'] as $name => $argument) {
-          if (!empty($argument['calendar']['granularity'])) {
-            $type = $argument['calendar']['granularity'];
-          }
-        }
+        $argument = CalendarHelper::getDateArgumentHandler($view, $id);
 
-        if ($type == $granularity) {
+        if ($argument->getGranularity() == $granularity) {
           $part_path =  $display['display_options']['path'];
           $parts = explode('/', $part_path);
           if (in_array('%', $parts)) {

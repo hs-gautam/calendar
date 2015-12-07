@@ -429,6 +429,7 @@ class Calendar extends StylePluginBase {
    * {@inheritdoc}
    */
   public function render() {
+    // @todo Move to $this->validate()
     if (empty($this->view->rowPlugin) || !$this->hasCalendarRowPlugin()) {
       debug('\Drupal\calendar\Plugin\views\style\CalendarStyle: The calendar row plugin is required when using the calendar style, but it is missing.');
       return;
@@ -437,16 +438,6 @@ class Calendar extends StylePluginBase {
       debug('\Drupal\calendar\Plugin\views\style\CalendarStyle: A calendar date argument is required when using the calendar style, but it is missing or is not using the default date.');
       return;
     }
-
-    // There are date arguments that have not been added by Date Views.
-    // They will be missing the information we would need to render the field.
-    // @todo uncomment this when we find a fix for the date range issue.
-//    if (empty($argument->min_date)) {
-//      return;
-//    }
-
-   // $argument->min_date = new \DateTime('0 months');
-    //$argument->max_date = new \DateTime('+3 months');
 
     // Add information from the date argument to the view.
     $this->dateInfo->setGranularity($argument->getGranularity());
@@ -608,11 +599,11 @@ class Calendar extends StylePluginBase {
         // If we're displaying the week number, add it as the first cell in the
         // week.
         if ($i == 0 && !empty($this->styleInfo->isShowWeekNumbers()) && !in_array($this->dateInfo->getGranularity(), ['day', 'week'])) {
-          $path = calendar_granularity_path($this->view, 'week');
-          if (!empty($path)) {
+          $url = CalendarHelper::getURLForGranularity($this->view, 'week', [$this->dateInfo->getMinYear() . $week]);
+          if (!empty($url)) {
             $week_number = [
               '#type' => 'link',
-              '#url' => Url::fromUri('base:' . $path . '/' . $this->dateInfo->getMinYear() . '-W' . $week),
+              '#url' => $url,
               '#title' => $week,
             ];
           }
@@ -867,7 +858,7 @@ class Calendar extends StylePluginBase {
    *   An assosiative array containing the multiday buckets, the singleday
    *   buckets and the total row count.
    */
-  public function calendarBuildWeek($check_month) {
+  public function calendarBuildWeek($check_month = FALSE) {
     $current_day_date = $this->currentDay->format(DATETIME_DATE_STORAGE_FORMAT);
     $month = $this->currentDay->format('n');
     $first_day = \Drupal::config('system.date')->get('first_day');
@@ -931,11 +922,11 @@ class Calendar extends StylePluginBase {
     $current_day_date = $this->currentDay->format(DATETIME_DATE_STORAGE_FORMAT);
 
     if (!empty($this->styleInfo->isShowWeekNumbers())) {
-      $path = calendar_granularity_path($this->view, 'week');
-      if (!empty($path)) {
+      $url = CalendarHelper::getURLForGranularity($this->view, 'week', $this->dateInfo->getMinYear() . $week);
+      if (!empty($url)) {
         $week_number = [
           '#type' => 'link',
-          '#url' => Url::fromUri('base:' . $path . '/' . $this->dateInfo->getMinYear() . '-W' . $week),
+          '#url' => $url,
           '#title' => $week,
         ];
       }
@@ -1252,4 +1243,25 @@ class Calendar extends StylePluginBase {
     ];
     return $content;
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validate() {
+    $errors = parent::validate();
+    $display_id = $this->displayHandler->display['id'];
+    if ($display_id == 'default') {
+      // @todo Update default display in templates to validate.
+      return $errors;
+    }
+    // @todo Validate row plugin
+    $argument = CalendarHelper::getDateArgumentHandler($this->view, $display_id);
+    if (empty($argument)) {
+      $errors[] = $this->t('\Drupal\calendar\Plugin\views\style\CalendarStyle: A calendar date argument is required when using the calendar style, but it is missing or is not using the default date.');
+    }
+    return $errors;
+
+  }
+
+
 }

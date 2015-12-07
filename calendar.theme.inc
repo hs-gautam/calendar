@@ -7,7 +7,6 @@
 use Drupal\calendar\CalendarHelper;
 use Drupal\Component\Datetime\DateTimePlus;
 use Drupal\Core\Datetime\Entity\DateFormat;
-use Drupal\Core\Url;
 use Drupal\views\Views;
 
 /**
@@ -594,13 +593,18 @@ function template_preprocess_calendar_datebox(&$vars) {
   $view = $vars['view'];
   $vars['day'] = intval(substr($date, 8, 2));
 //  $force_view_url = !empty($view->dateInfo->block) ? TRUE : FALSE;
-  $month_path = calendar_granularity_path($view, 'month');
-  $year_path = calendar_granularity_path($view, 'year');
-  $day_path = calendar_granularity_path($view, 'day');
-  // @FIXME
-  $vars['url'] = 'base:url';
+
+  $full_date_arg = str_replace('-', '', $date);
+  $day_url = CalendarHelper::getURLForGranularity($view, 'day', [$full_date_arg]);
 //  $vars['url'] = str_replace([$month_path, $year_path], $day_path, date_pager_url($view, NULL, $date, $force_view_url));
-  $vars['link'] = !empty($day_path) ? \Drupal::l($vars['day'], Url::fromUri($vars['url'])) : $vars['day'];
+  if ($day_url) {
+    $vars['link'] = \Drupal::l($vars['day'],$day_url);
+  }
+  else {
+    $vars['link'] = $vars['day'];
+  }
+
+
 
   $vars['granularity'] = $view->dateInfo->getGranularity();
   $vars['mini'] = !empty($view->styleInfo->isMini());
@@ -621,6 +625,7 @@ function template_preprocess_calendar_datebox(&$vars) {
  * Format an calendar month node for display.
  */
 function template_preprocess_calendar_month_multiple_entity(&$vars) {
+  // @todo Fix when multiday events are supported again.
   $view = $vars['view'];
   $curday = $vars['curday'];
   $count = $vars['count'];
