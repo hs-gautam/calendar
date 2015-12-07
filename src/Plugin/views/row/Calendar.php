@@ -153,7 +153,7 @@ class Calendar extends RowPluginBase {
     ];
 
     $options = [];
-    // @todo Allow strip options for any bunldes of any content type
+    // @todo Allow strip options for any bundes of any entity type
     if ($this->view->getBaseTables()['node_field_data']) {
       $options['type'] = $this->t('Based on Content Type');
     }
@@ -196,7 +196,7 @@ class Calendar extends RowPluginBase {
               'calendar/calendar.colorpicker',
             ],
           ],
-        ];
+        ] + $this->visibleOnLegendState('type');
       }
     }
 
@@ -207,7 +207,7 @@ class Calendar extends RowPluginBase {
       foreach ($fields as $name => $field_info) {
         // Select the proper field type.
         if ($this->isTermReferenceField($field_info, $this->fieldManager)) {
-          $vocabulary_field_options[$name] = $field_info['label'] ?: $name;
+            $vocabulary_field_options[$name] = $field_info['label'] ?: $name;
         }
       }
       $form['colors']['taxonomy_field'] = [
@@ -217,8 +217,9 @@ class Calendar extends RowPluginBase {
         '#empty_value' => $this->t('None'),
         '#description' => $this->t("Select the taxonomy term field to use when setting stripe colors. This works best for vocabularies with only a limited number of possible terms."),
         '#options' => $vocabulary_field_options,
+        // @todo Is this in the form api?
         '#dependency' => ['edit-row-options-colors-legend' => ['taxonomy']],
-      ];
+      ] + $this->visibleOnLegendState('taxonomy');
 
       if (empty($vocabulary_field_options)) {
         $form['colors']['taxonomy_field']['#options'] = ['' => ''];
@@ -249,9 +250,10 @@ class Calendar extends RowPluginBase {
         '#title' => t('Vocabulary Legend Types'),
         '#type' => 'value',
         '#value' => $vocab_vids,
-      ];
+      ]  + $this->visibleOnLegendState('taxonomy');
 
       // Get the Vocabulary term id's and map to colors.
+      // @todo Add labels for each Vocabulary.
       $term_colors = $this->options['colors']['calendar_colors_taxonomy'];
       foreach ($vocab_vids as $field_name => $vid) {
         $vocab = \Drupal::entityManager()->getStorage("taxonomy_term")->loadTree($vid);
@@ -278,7 +280,7 @@ class Calendar extends RowPluginBase {
                 'calendar/calendar.colorpicker',
               ],
             ],
-          ];
+          ]  + $this->visibleOnLegendState('taxonomy');
         }
       }
     }
@@ -685,6 +687,21 @@ class Calendar extends RowPluginBase {
     return;
   }
 
+  /**
+   * Get form options for hiding elements based on legend type.
+   * @param $mode
+   *
+   * @return array
+   */
+  protected function visibleOnLegendState($mode) {
+    return [
+      '#states' => [
+        'visible' => [
+          ':input[name="row_options[colors][legend]"]' => array('value' => $mode),
+        ],
+      ],
+    ];
+  }
 
 
 }

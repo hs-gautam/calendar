@@ -19,6 +19,8 @@ trait CalendarViewsTrait {
     static $recursion = 0;
     if ($table = Views::viewsData()->get($table)) {
       if (!empty($table['table']['entity type'])) {
+        // Reset recursion when we found a value.
+        $recursion = 0;
         return $table['table']['entity type'];
       }
       elseif (!empty($table['table']['join']) && count($table['table']['join']) == 1) {
@@ -42,7 +44,6 @@ trait CalendarViewsTrait {
    */
   protected function isTermReferenceField($field_info, EntityFieldManagerInterface $field_manager) {
     if (!empty($field_info['type']) && $field_info['type'] == 'entity_reference_label') {
-      $a = 'd';
       if ($entity_type = $this->getTableEntityType($field_info['table'])) {
         $field_definitions = $field_manager->getFieldStorageDefinitions($entity_type);
         $field_definition = $field_definitions[$field_info['field']];
