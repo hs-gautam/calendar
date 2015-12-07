@@ -29,3 +29,4 @@ calendar.theme:
   css:
     theme:
       css/calendar.css: {}
+      css/calendar_multiday.css: {}
