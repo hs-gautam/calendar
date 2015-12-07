@@ -8,6 +8,7 @@ namespace Drupal\calendar;
 use Datetime;
 use DateTimeZone;
 use Drupal\Core\Datetime\DateHelper;
+use Drupal\Core\Routing\RouteProvider;
 use Drupal\Core\Url;
 use Drupal\views\Plugin\views\argument\ArgumentPluginBase;
 use Drupal\views\Plugin\views\filter\Broken;
@@ -871,11 +872,23 @@ class CalendarHelper extends DateHelper {
    * @return \Drupal\Core\Url|null
    */
   static function getURLForGranularity(ViewExecutable $view, $granularity, $arguments) {
+    $granularity_links = $view->getStyle()->options['granularity_links'];
+    if ($granularity_links[$granularity]) {
+      /** @var RouteProvider $router */
+      $router = \Drupal::getContainer()->get('router.route_provider');
+      $route_name = $granularity_links[$granularity];
+      // Check if route exists. $router->getRoutesByName will throw error if no match.
+      $routes =$router->getRoutesByNames([$route_name]);
+      if ($routes) {
+        return Url::fromRoute($route_name, static::getViewRouteParameters($arguments));
+      }
+    }
     if ($display_id = static::getDisplayForGranularity($view, $granularity)) {
       // @todo Handle arguments in different positions
       // @todo Handle query string parameters.
       return static::getViewsURL($view, $display_id, $arguments);
     }
+
     return NULL;
   }
 
@@ -889,13 +902,36 @@ class CalendarHelper extends DateHelper {
    * @return \Drupal\Core\Url
    */
   static function getViewsURL(ViewExecutable $view, $display_id, $args = []) {
+    $route_parameters = static::getViewRouteParameters($args);
+    $route_name = static::getDisplayRouteName($view->id(), $display_id);
+    return Url::fromRoute($route_name, $route_parameters);
+  }
+
+  /**
+   * Get Route name for a display
+   *
+   * Not sure where is documented but the route names are made in \Drupal\views\EventSubscriber\RouteSubscriber
+   * @param $view_id
+   * @param $display_id
+   *
+   * @return string
+   */
+  static function getDisplayRouteName($view_id, $display_id) {
+    return 'view.' . $view_id . '.' . $display_id;
+  }
+
+  /**
+   * @param $args
+   *
+   * @return array
+   */
+  static function getViewRouteParameters($args) {
     $route_parameters = [];
     $arg_position = 0;
     foreach ($args as $arg) {
       $route_parameters['arg_' . $arg_position] = $arg;
       $arg_position++;
     }
-    $route_name = 'view.' . $view->id() . '.' . $display_id;
-    return Url::fromRoute($route_name, $route_parameters);
+    return $route_parameters;
   }
 }

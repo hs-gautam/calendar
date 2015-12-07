@@ -11,6 +11,7 @@ use Drupal\calendar\CalendarDateInfo;
 use Drupal\calendar\CalendarHelper;
 use Drupal\calendar\CalendarStyleInfo;
 use Drupal\calendar\DateArgumentWrapper;
+use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\argument\Date;
 use Drupal\Core\Datetime\DateFormatter;
 use Drupal\calendar\Plugin\views\row\Calendar as CalendarRow;
@@ -19,6 +20,7 @@ use Drupal\Core\Url;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\style\StylePluginBase;
 use Drupal\views\ViewExecutable;
+use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -180,6 +182,12 @@ class Calendar extends StylePluginBase {
     $options['groupby_times_custom'] = ['default' => ''];
     $options['groupby_field'] = ['default' => ''];
     $options['multiday_hidden'] = ['default' => []];
+    $options['granularity_links'] = [
+      'default' => [
+        'day' => '',
+        'week' => '',
+      ],
+    ];
 
     return $options;
   }
@@ -384,6 +392,23 @@ class Calendar extends StylePluginBase {
           ],
         ],
       ],
+    ];
+
+    // Allow custom Day and Week links
+    $form['granularity_links'] = ['#tree' => TRUE];
+    $form['granularity_links']['day'] = [
+      '#title' => $this->t('Day link displays'),
+      '#type' => 'select',
+      '#default_value' => $this->options['granularity_links']['day'],
+      '#description' => $this->t("Optionally select a View display to use for Day links."),
+      '#options' => ['' => $this->t('Default display')] + $this->viewOptionsForGranularity('day'),
+    ];
+    $form['granularity_links']['week'] = [
+      '#title' => $this->t('Week link displays'),
+      '#type' => 'select',
+      '#default_value' => $this->options['granularity_links']['week'],
+      '#description' => $this->t("Optionally select a View display to use for Week links."),
+      '#options' => ['' => $this->t('Default display')] + $this->viewOptionsForGranularity('week'),
     ];
   }
 
@@ -1261,6 +1286,32 @@ class Calendar extends StylePluginBase {
     }
     return $errors;
 
+  }
+
+  /**
+   * Get select options for Views displays that support Calendar with set granularity.
+   *
+   * @param $granularity
+   *
+   * @return array
+   */
+  protected function viewOptionsForGranularity($granularity) {
+    $options = [];
+    $view_displays = Views::getApplicableViews('uses_route');
+    foreach ($view_displays as $view_display) {
+      list($view_id, $display_id)  = $view_display;
+
+      $view = View::load($view_id);
+      $view_exec = $view->getExecutable();
+      if ($argument = CalendarHelper::getDateArgumentHandler($view_exec, $display_id)) {
+        if ($argument->getGranularity() == $granularity) {
+          $route_name = CalendarHelper::getDisplayRouteName($view_id, $display_id);
+          $options[$route_name] = $view->label() . ' : ' . $view_exec->displayHandlers->get($display_id)->display['display_title'];
+        }
+      }
+
+    }
+    return $options;
   }
 
 
