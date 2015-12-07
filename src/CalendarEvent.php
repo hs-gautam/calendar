@@ -5,29 +5,13 @@
  */
 
 namespace Drupal\calendar;
+use Drupal\Core\Entity\ContentEntityBase;
+use Drupal\Core\Entity\ContentEntityInterface;
 
 /**
  * Defines a calendar event object.
  */
 class CalendarEvent {
-
-  /**
-   * @var int $entityId
-   *   The id of the entity for this event.
-   */
-  protected $entityId;
-
-  /**
-   * @var string $entityType
-   *   The type id of the entity for this event.
-   */
-  protected $entityTypeId;
-
-  /**
-   * @var string $type
-   *   The type of the entity.
-   */
-  protected $type;
 
   /**
    * @var \DateTime $startDate
@@ -59,17 +43,6 @@ class CalendarEvent {
    */
   protected $timezone;
 
-  /**
-   * @var string $title
-   *   The title of the event.
-   */
-  protected $title;
-
-  /**
-   * @var string $url
-   *   The public url for this event.
-   */
-  protected $url;
 
   /**
    * @var array
@@ -95,6 +68,16 @@ class CalendarEvent {
    */
   protected $isMultiDay;
 
+  /** @var  ContentEntityInterface */
+  protected $entity;
+
+  /**
+   * CalendarEvent constructor.
+   */
+  public function __construct(ContentEntityInterface $entity) {
+    $this->entity = $entity;
+  }
+
   /**
    * Getter for the entity id.
    *
@@ -102,37 +85,19 @@ class CalendarEvent {
    *   The entity id.
    */
   public function getEntityId() {
-    return $this->entityId;
-  }
-
-  /**
-   * Setter for the entity id.
-   *
-   * @param int $entityId
-   *   The entity id.
-   */
-  public function setEntityId($entityId) {
-    $this->entityId = $entityId;
+    return $this->entity->id();
   }
 
   /**
    * Getter for the entity type id.
    *
+   * @todo Remove for getType
+   *
    * @return string
    *   The entity type id.
    */
   public function getEntityTypeId() {
-    return $this->entityTypeId;
-  }
-
-  /**
-   * Setter for the entity type d.
-   *
-   * @param string $entityTypeId
-   *   The entity type id.
-   */
-  public function setEntityTypeId($entityTypeId) {
-    $this->entityTypeId = $entityTypeId;
+    return $this->getEntityId();
   }
 
   /**
@@ -142,18 +107,13 @@ class CalendarEvent {
    *   The type of the entity.
    */
   public function getType() {
-    return $this->type;
+    return $this->entity->getEntityTypeId();
   }
 
-  /**
-   * Setter for the type.
-   *
-   * @param string $type
-   *   The type of the entity.
-   */
-  public function setType($type) {
-    $this->type = $type;
+  public function getBundle() {
+    return $this->entity->bundle();
   }
+
 
   /**
    * Getter for the start date.
@@ -262,17 +222,7 @@ class CalendarEvent {
    *   The title of the event.
    */
   public function getTitle() {
-    return $this->title;
-  }
-
-  /**
-   * The title setter.
-   *
-   * @param string $title
-   *   The title of the event.
-   */
-  public function setTitle($title) {
-    $this->title = $title;
+    return $this->entity->label();
   }
 
   /**
@@ -282,18 +232,9 @@ class CalendarEvent {
    *   The public url to this event.
    */
   public function getUrl() {
-    return $this->url;
+    return $this->getUrl();
   }
 
-  /**
-   * Setter for the url.
-   *
-   * @param string $url
-   *   The public url to this event.
-   */
-  public function setUrl($url) {
-    $this->url = $url;
-  }
 
   /**
    * Getter for the rendered fields array.

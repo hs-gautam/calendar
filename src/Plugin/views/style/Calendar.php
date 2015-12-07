@@ -725,7 +725,6 @@ class Calendar extends StylePluginBase {
                 }
               }
               else {
-                // todo fix this since $event['entry'] is a render array now.
                 $single_days = [];
                 foreach ($singleday_buckets[$week_day] as $day) {
                   foreach ($day as $event) {
@@ -734,7 +733,7 @@ class Calendar extends StylePluginBase {
                       // @todo more logic
                     }
                     else {
-                      $single_days = $event['entry'];
+                      $single_days[] = $event['entry'];
                     }
                     //$single_days .= (isset($event['more_link'])) ? '<div class="calendar-more">' . $event['entry'] . '</div>' : $event['entry'];
                   }

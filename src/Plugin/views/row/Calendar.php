@@ -9,7 +9,9 @@ namespace Drupal\calendar\Plugin\views\row;
 
 use Drupal\calendar\CalendarEvent;
 use Drupal\calendar\CalendarHelper;
+use Drupal\calendar\CalendarViewsTrait;
 use Drupal\calendar\DateFieldWrapper;
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\views\Plugin\views\argument\Date;
 use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Entity\Entity;
@@ -33,6 +35,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class Calendar extends RowPluginBase {
+
+  use CalendarViewsTrait;
 
   /**
    * @var \Drupal\Core\Datetime\DateFormatter $dateFormatter
@@ -64,6 +68,11 @@ class Calendar extends RowPluginBase {
   protected $dateArgument;
 
   /**
+   * @var \Drupal\Core\Entity\EntityFieldManagerInterface
+   */
+  protected $fieldManager;
+
+  /**
    * {@inheritdoc}
    */
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
@@ -86,17 +95,24 @@ class Calendar extends RowPluginBase {
    * @param \Drupal\Core\Datetime\DateFormatter $date_formatter
    *   The date formatter service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, DateFormatter $date_formatter) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, DateFormatter $date_formatter, EntityFieldManagerInterface $field_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->dateFormatter = $date_formatter;
+    $this->fieldManager = $field_manager;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('date.formatter'));
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('date.formatter'),
+      $container->get('entity_field.manager')
+    );
   }
 
   /**
@@ -135,6 +151,7 @@ class Calendar extends RowPluginBase {
     ];
 
     $options = [];
+    // @todo Allow strip options for any bunldes of any content type
     if ($this->view->getBaseTables()['node_field_data']) {
       $options['type'] = $this->t('Based on Content Type');
     }
@@ -187,7 +204,7 @@ class Calendar extends RowPluginBase {
       $fields = $this->displayHandler->getOption('fields');
       foreach ($fields as $name => $field_info) {
         // Select the proper field type.
-        if (!empty($field_info['type']) && $field_info['type'] == 'entity_reference_label') {
+        if ($this->isTermReferenceField($field_info, $this->fieldManager)) {
           $vocabulary_field_options[$name] = $field_info['label'] ?: $name;
         }
       }
@@ -209,6 +226,7 @@ class Calendar extends RowPluginBase {
       // Get the Vocabulary names.
       $vocab_vids = [];
       foreach ($vocabulary_field_options as $field_name => $label) {
+        // @todo Provide storage manager via Dependency Injection
         $field_config = \Drupal::entityManager()->getStorage('field_config')->loadByProperties(['field_name' => $field_name]);
 
         // @TODO refactor
@@ -304,7 +322,7 @@ class Calendar extends RowPluginBase {
       }
     }
 
-    $base_tables = Views::viewsData()->fetchBaseTables();
+    $base_tables = $this->view->getBaseTables();
     $base_table = key($base_tables);
     $table_data = Views::viewsData()->get($base_table);
     $this->entityType = $table_data['table']['entity type'];
@@ -321,7 +339,7 @@ class Calendar extends RowPluginBase {
 //    $data = date_views_fields($this->view->base_table);
 //    $data = $data['name'];
 
-    $data = CalendarHelper::dateViewFields();
+    $data = CalendarHelper::dateViewFields($this->entityType);
 
 //    $data['name'] = 'node_field_data.created_year';
     $date_fields = [];
@@ -330,10 +348,12 @@ class Calendar extends RowPluginBase {
       if ($handler instanceof Date) {
         // Strip "_calendar" from the field name.
         $fieldName = $handler->realField;
-        $date_fields[$fieldName] = $data['alias'][$handler->table . '_' . $fieldName];
-
+        if (!empty($data['alias'][$handler->table . '_' . $fieldName])) {
+          $date_fields[$fieldName] = $data['alias'][$handler->table . '_' . $fieldName];
+          $this->dateFields = $date_fields;
+        }
         $this->dateArgument = $handler;
-        $this->dateFields = $date_fields;
+
       }
     }
 //
@@ -364,7 +384,7 @@ class Calendar extends RowPluginBase {
       // Clone this entity so we can change it's values without altering other
       // occurrences of this entity on the same page, for example in an
       // "Upcoming" block.
-      /** @var \Drupal\node\Entity\Node $entity */
+      /** @var \Drupal\Core\Entity\ContentEntityBase $entity */
       $entity = clone($this->entities[$id]);
 
       if (empty($entity)) {
@@ -379,12 +399,7 @@ class Calendar extends RowPluginBase {
 //      $rrule_field = $info['rrule_field'];
 //      $is_field    = $info['is_field'];
 
-      $event = new CalendarEvent();
-      $event->setTitle($entity->label());
-      $event->setEntityId($entity->id());
-      $event->setEntityTypeId($entity->getEntityType()->id());
-      $event->setType($entity->getType());
-      $event->setUrl($entity->url());
+      $event = new CalendarEvent($entity);
 
       // Retrieve the field value(s) that matched our query from the cached node.
       // Find the date and set it to the right timezone.
@@ -505,7 +520,10 @@ class Calendar extends RowPluginBase {
       foreach ($events as $event) {
         switch ($this->options['colors']['legend']) {
           case 'type':
-            $this->nodeTypeStripe($event);
+            if ($event->getEntityTypeId() == 'node') {
+              $this->nodeTypeStripe($event);
+            }
+
             break;
           case 'taxonomy':
             $this->calendar_taxonomy_stripe($event);
@@ -621,14 +639,14 @@ class Calendar extends RowPluginBase {
     }
 
     $type_names = node_type_get_names();
-    $type = $result->getType();
+    $bundle = $result->getBundle();
     $label = '';
     $stripe = '';
-    if (array_key_exists($type, $type_names) || $colors[$type] == CALENDAR_EMPTY_STRIPE) {
-      $label = $type_names[$type];
+    if (array_key_exists($bundle, $type_names) || $colors[$bundle] == CALENDAR_EMPTY_STRIPE) {
+      $label = $type_names[$bundle];
     }
-    if (array_key_exists($type, $colors)) {
-      $stripe = $colors[$type];
+    if (array_key_exists($bundle, $colors)) {
+      $stripe = $colors[$bundle];
     }
 
     $result->setStripeLabels($result->getStripeLabels() + [$label]);
@@ -661,5 +679,7 @@ class Calendar extends RowPluginBase {
 
     return;
   }
+
+
 
 }

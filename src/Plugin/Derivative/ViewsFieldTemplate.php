@@ -119,7 +119,7 @@ class ViewsFieldTemplate implements ContainerDeriverInterface {
                   'field_id' => $field_info['entity field'],
                   'base_table' => $table_id,
                   'base_field' => $this->getTableBaseField($entity_views_table),
-                  'default_field_id' => $this->getTableDefaultField($entity_views_table),
+                  'default_field_id' => $this->getTableDefaultField($entity_views_table, $entity_type_id),
                   'field_label' => $field_info['title'],
                 ],
                 'view_template_id' => 'calendar_base_field',
