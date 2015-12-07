@@ -12,6 +12,8 @@ use Drupal\calendar\CalendarHelper;
 use Drupal\calendar\CalendarViewsTrait;
 use Drupal\calendar\DateFieldWrapper;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Field\EntityReferenceFieldItemListInterface;
+use Drupal\taxonomy\Entity\Term;
 use Drupal\views\Plugin\views\argument\Date;
 use Drupal\Core\Datetime\DateFormatter;
 use Drupal\Core\Entity\Entity;
@@ -515,7 +517,7 @@ class Calendar extends RowPluginBase {
 //         'field_alias' => isset($this->field_alias) ? $this->field_alias : '',
 //       ));
 
-
+      /** @var \Drupal\calendar\CalendarEvent[] $events */
       $events = $this->explode_values($event);
       foreach ($events as $event) {
         switch ($this->options['colors']['legend']) {
@@ -526,7 +528,7 @@ class Calendar extends RowPluginBase {
 
             break;
           case 'taxonomy':
-            $this->calendar_taxonomy_stripe($event);
+            $this->calendarTaxonomyStripe($event);
             break;
         }
         $rows[] = $event;
@@ -629,51 +631,54 @@ class Calendar extends RowPluginBase {
   /**
    * Create a stripe base on node type.
    *
-   * @param \Drupal\calendar\CalendarEvent $result
+   * @param \Drupal\calendar\CalendarEvent $event
    *   The event result object.
    */
-  function nodeTypeStripe(&$result) {
+  function nodeTypeStripe(&$event) {
     $colors = isset($this->options['colors']['calendar_colors_type']) ? $this->options['colors']['calendar_colors_type'] : [];
     if (empty($colors)) {
       return;
     }
 
     $type_names = node_type_get_names();
-    $bundle = $result->getBundle();
+    $bundle = $event->getBundle();
     $label = '';
-    $stripe = '';
+    $stripeHex = '';
     if (array_key_exists($bundle, $type_names) || $colors[$bundle] == CALENDAR_EMPTY_STRIPE) {
       $label = $type_names[$bundle];
     }
     if (array_key_exists($bundle, $colors)) {
-      $stripe = $colors[$bundle];
+      $stripeHex = $colors[$bundle];
     }
 
-    $result->setStripeLabels($result->getStripeLabels() + [$label]);
-    $result->setStripeHexes($result->getStripeHexes() + [$stripe]);
+    $event->addStripeLabel($label);
+    $event->addStripeHex($stripeHex);
   }
 
-   /**
+  /**
    * Create a stripe based on a taxonomy term.
-    *
-    * @todo rename and document
+   *
+   * @param CalendarEvent $event
    */
-  function calendar_taxonomy_stripe(&$result) {
+  function calendarTaxonomyStripe(&$event) {
     $colors = isset($this->options['colors']['calendar_colors_taxonomy']) ? $this->options['colors']['calendar_colors_taxonomy'] : [];
     if (empty($colors)) {
       return;
     }
 
-    $entity = $result->entity;
+    $entity = $event->getEntity();
     $term_field_name = $this->options['colors']['taxonomy_field'];
-    if ($terms_for_entity = field_get_items($this->view->base_table, $entity, $term_field_name)) {
-      foreach ($terms_for_entity as $delta => $item) {
-        $term_for_entity = \Drupal::entityManager()->getStorage("taxonomy_term")->load($item['tid']);
-        if (!array_key_exists($term_for_entity->tid, $colors) || $colors[$term_for_entity->tid] == CALENDAR_EMPTY_STRIPE) {
+    if ($entity->hasField($term_field_name) && $terms_for_entity = $entity->get($term_field_name)) {
+      /** @var EntityReferenceFieldItemListInterface $item */
+      foreach ($terms_for_entity as $item) {
+        $tid = $item->getValue()['target_id'];
+        $term = Term::load($tid);
+
+        if (!array_key_exists($tid, $colors) || $colors[$tid] == CALENDAR_EMPTY_STRIPE) {
           continue;
         }
-        $result->setStripeLabels($result->getStripeLabels() + [$colors[$term_for_entity->tid]]);
-        $result->setStripeHexes($result->getStripeHexes() + [$term_for_entity->name]);
+        $event->addStripeLabel($term->name->value);
+        $event->addStripeHex($colors[$tid]);
       }
     }
 

@@ -97,7 +97,14 @@ class CalendarEvent {
    *   The entity type id.
    */
   public function getEntityTypeId() {
-    return $this->getEntityId();
+    return $this->entity->getEntityTypeId();
+  }
+
+  /**
+   * @return ContentEntityInterface
+   */
+  public function getEntity() {
+    return $this->entity;
   }
 
   /**
@@ -304,6 +311,24 @@ class CalendarEvent {
    */
   public function setStripeHexes($stripeHexes) {
     $this->stripeHexes = $stripeHexes;
+  }
+
+  /**
+ * Add a single strip hex.
+ *
+ * @param $stripeHex
+ */
+  public function addStripeHex($stripeHex) {
+    $this->stripeHexes[] = $stripeHex;
+  }
+
+  /**
+   * Add a single strip label.
+   *
+   * @param $stripeHex
+   */
+  public function addStripeLabel($stripeLabel) {
+    $this->stripeLabels[] = $stripeLabel;
   }
 
   /**

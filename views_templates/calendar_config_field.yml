@@ -305,7 +305,7 @@ display:
           admin_label: ''
           empty: true
           tokenize: 1
-          content: '{{ arguments.field_event_date_value_year_month }}'
+          content: '{{ arguments.__FIELD_ID_year_month }}'
           pager_embed: 0
           plugin_id: calendar_header
         calendar_header_1:
@@ -425,7 +425,7 @@ display:
           admin_label: ''
           empty: true
           tokenize: 1
-          content: 'Week of {{ arguments.field_event_date_value_year_week }}'
+          content: 'Week of {{ arguments.__FIELD_ID_year_week }}'
           pager_embed: 0
           plugin_id: calendar_header
         calendar_header_1:
@@ -542,7 +542,7 @@ display:
           admin_label: ''
           empty: true
           tokenize: 1
-          content: '{{ arguments.field_event_date_value_full_date }}'
+          content: '{{ arguments.__FIELD_ID_full_date }}'
           pager_embed: 0
           plugin_id: calendar_header
         calendar_header_1:
@@ -649,7 +649,7 @@ display:
           admin_label: ''
           empty: true
           tokenize: 1
-          content: '{{ arguments.field_event_date_value_year }}'
+          content: '{{ arguments.__FIELD_ID_year }}'
           pager_embed: 0
           plugin_id: calendar_header
         calendar_header_1:
