@@ -146,11 +146,13 @@ class Calendar extends RowPluginBase {
       '#markup' => $this->t("The calendar row plugin will format view results as calendar items. Make sure this display has a 'Calendar' format and uses a 'Date' contextual filter, or this plugin will not work correctly."),
     ];
 
+
     $form['colors'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Legend Colors'),
       '#description' =>  $this->t('Set a hex color value (like #ffffff) to use in the calendar legend for each content type. Items with empty values will have no stripe in the calendar and will not be added to the legend.'),
     ];
+
 
     $options = [];
     // @todo Allow strip options for any bundes of any entity type
@@ -200,6 +202,8 @@ class Calendar extends RowPluginBase {
       }
     }
 
+
+
     if (\Drupal::moduleHandler()->moduleExists('taxonomy')) {
       // Get the display's field names of taxonomy fields.
       $vocabulary_field_options = [];
@@ -209,6 +213,9 @@ class Calendar extends RowPluginBase {
         if ($this->isTermReferenceField($field_info, $this->fieldManager)) {
             $vocabulary_field_options[$name] = $field_info['label'] ?: $name;
         }
+      }
+      if (empty($vocabulary_field_options)) {
+        return;
       }
       $form['colors']['taxonomy_field'] = [
         '#title' => t('Term field'),
@@ -228,6 +235,7 @@ class Calendar extends RowPluginBase {
 
       // Get the Vocabulary names.
       $vocab_vids = [];
+
       foreach ($vocabulary_field_options as $field_name => $label) {
         // @todo Provide storage manager via Dependency Injection
         $field_config = \Drupal::entityManager()->getStorage('field_config')->loadByProperties(['field_name' => $field_name]);
@@ -238,19 +246,24 @@ class Calendar extends RowPluginBase {
 
         $data = \Drupal::config('field.field.' . $field_config[$key]->getOriginalId())->getRawData();
 
-        $target_bundles = $data['settings']['handler_settings']['target_bundles'];
-        reset($target_bundles);
-        $vocab_vids[$field_name] = key($target_bundles);
+        if ($target_bundles = $data['settings']['handler_settings']['target_bundles']) {
+          // Fields must target bundles set.
+          reset($target_bundles);
+          $vocab_vids[$field_name] = key($target_bundles);
+        }
+      }
 
+      if (empty($vocab_vids)) {
+        return;
       }
 
       $this->options['colors']['calendar_colors_vocabulary'] = $vocab_vids;
 
       $form['colors']['calendar_colors_vocabulary'] = [
-        '#title' => t('Vocabulary Legend Types'),
-        '#type' => 'value',
-        '#value' => $vocab_vids,
-      ]  + $this->visibleOnLegendState('taxonomy');
+          '#title' => t('Vocabulary Legend Types'),
+          '#type' => 'value',
+          '#value' => $vocab_vids,
+        ] + $this->visibleOnLegendState('taxonomy');
 
       // Get the Vocabulary term id's and map to colors.
       // @todo Add labels for each Vocabulary.
@@ -259,31 +272,35 @@ class Calendar extends RowPluginBase {
         $vocab = \Drupal::entityManager()->getStorage("taxonomy_term")->loadTree($vid);
         foreach ($vocab as $key => $term) {
           $form['colors']['calendar_colors_taxonomy'][$term->tid] = [
-            '#title' => $this->t($term->name),
-            '#default_value' => isset($term_colors[$term->tid]) ? $term_colors[$term->tid] : CALENDAR_EMPTY_STRIPE,
-            '#access' => !empty($vocabulary_field_options),
-            '#dependency_count' => 2,
-            '#dependency' => [
-              'edit-row-options-colors-legend' => ['taxonomy'],
-              'edit-row-options-colors-taxonomy-field' => [$field_name],
-            ],
-            '#type' => 'textfield',
-            '#size' => 7,
-            '#maxlength' => 7,
-            '#element_validate' => [[$this, 'validateHexColor']],
-            '#prefix' => '<div class="calendar-colorpicker-wrapper">',
-            '#suffix' => '<div class="calendar-colorpicker"></div></div>',
-            '#attributes' => ['class' => ['edit-calendar-colorpicker']],
-            '#attached' => [
-              // Add Farbtastic color picker and the js to trigger it.
-              'library' => [
-                'calendar/calendar.colorpicker',
+              '#title' => $this->t($term->name),
+              '#default_value' => isset($term_colors[$term->tid]) ? $term_colors[$term->tid] : CALENDAR_EMPTY_STRIPE,
+              '#access' => !empty($vocabulary_field_options),
+              '#dependency_count' => 2,
+              '#dependency' => [
+                'edit-row-options-colors-legend' => ['taxonomy'],
+                'edit-row-options-colors-taxonomy-field' => [$field_name],
               ],
-            ],
-          ]  + $this->visibleOnLegendState('taxonomy');
+              '#type' => 'textfield',
+              '#size' => 7,
+              '#maxlength' => 7,
+              '#element_validate' => [[$this, 'validateHexColor']],
+              '#prefix' => '<div class="calendar-colorpicker-wrapper">',
+              '#suffix' => '<div class="calendar-colorpicker"></div></div>',
+              '#attributes' => ['class' => ['edit-calendar-colorpicker']],
+              '#attached' => [
+                // Add Farbtastic color picker and the js to trigger it.
+                'library' => [
+                  'calendar/calendar.colorpicker',
+                ],
+              ],
+            ]  + $this->visibleOnLegendState('taxonomy');
         }
       }
+
     }
+
+
+
   }
 
   /**

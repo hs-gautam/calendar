@@ -10,6 +10,7 @@ namespace Drupal\calendar\Plugin\views\pager;
 
 use Drupal\calendar\CalendarHelper;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\Plugin\views\pager\PagerPluginBase;
 use Drupal\views\ViewExecutable;
@@ -50,10 +51,10 @@ class CalendarPager extends PagerPluginBase {
    */
   public function render($input) {
     $items['previous'] = [
-      'href' => $this->getPagerHref($this::PREVIOUS),
+      'url' => $this->getPagerURL($this::PREVIOUS),
     ];
     $items['next'] = [
-      'href' => $this->getPagerHref($this::NEXT),
+      'url' => $this->getPagerURL($this::NEXT),
     ];
     return array(
       '#theme' => $this->themeFunctions(),
@@ -84,7 +85,7 @@ class CalendarPager extends PagerPluginBase {
    *
    * @return string
    */
-  protected function getPagerHref($mode) {
+  protected function getPagerURL($mode) {
     $value = $this->getPagerArgValue($mode);
     $base_path = $this->view->getPath();
     $current_position = 0;
@@ -94,14 +95,16 @@ class CalendarPager extends PagerPluginBase {
      */
     foreach ($this->view->argument as $name => $handler) {
       if ($current_position != $this->argument->getPosition()) {
-        $arg_vals[$current_position] = $handler->getValue();
+        $arg_vals["arg_$current_position"] = $handler->getValue();
       }
       else {
-        $arg_vals[$current_position] = $value;
+        $arg_vals["arg_$current_position"] = $value;
       }
       $current_position++;
     }
-    return '/' . $base_path . '/' . implode('/', $arg_vals);
+    
+    // @todo How do you get display_id here so we can use CalendarHelper::getViewsURL
+    return Url::fromUri('internal:/' . $base_path . '/' . implode('/', $arg_vals));
   }
 
   /**
