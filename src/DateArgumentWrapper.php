@@ -86,7 +86,7 @@ class DateArgumentWrapper {
 
   public function createDateTime() {
     if ($value = $this->dateArg->getValue()) {
-      if (!$this->validateValue($value)) {
+      if (!$this->validateValue()) {
         return FALSE;
       }
       return $this->createFromFormat($value);
@@ -191,11 +191,18 @@ class DateArgumentWrapper {
    *
    * @return bool
    */
-  public function validateValue($value)
+  public function validateValue()
   {
+    $value = $this->dateArg->getValue();
+    if (empty($value)) {
+      return FALSE;
+    }
     if ($this->getArgFormat() == 'YW') {
       $info = $this->getYearWeek($value);
-      return $info['week'] >= 1 && $info['week'] <= 52;
+      // Find the max week for a year. Some years start a 53rd week.
+      $max_week = gmdate("W", strtotime("31 December {$info['year']}"));
+      return $info['week'] >= 1 && $info['week'] <= $max_week;
+
     }
     else {
       $created_date = $this->createFromFormat($value);

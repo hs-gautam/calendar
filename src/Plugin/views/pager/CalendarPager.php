@@ -50,6 +50,9 @@ class CalendarPager extends PagerPluginBase {
    * {@inheritdoc}
    */
   public function render($input) {
+    if (!$this->argument->validateValue()) {
+      return [];
+    }
     $items['previous'] = [
       'url' => $this->getPagerURL($this::PREVIOUS),
     ];

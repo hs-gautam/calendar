@@ -464,6 +464,23 @@ class Calendar extends StylePluginBase {
       return;
     }
 
+    if (!$argument->validateValue()) {
+      if (!$argument->getDateArg()->getValue()) {
+       $msg = 'No calendar date argument value was provided.';
+      }
+      else {
+        $msg = t('The value <strong>@value</strong> is a valid date argument for @granularity',
+          [
+            '@value' => $argument->getDateArg()->getValue(),
+            '@granularity' => $argument->getGranularity(),
+          ]
+        );
+      }
+      drupal_set_message($msg, 'error');
+      return;
+    }
+
+
     // Add information from the date argument to the view.
     $this->dateInfo->setGranularity($argument->getGranularity());
     $this->dateInfo->setCalendarType($this->options['calendar_type']);
