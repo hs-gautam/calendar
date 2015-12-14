@@ -63,6 +63,11 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
     return $options;
   }
 
+  /**
+   * Get default format value for the options form.
+   *
+   * @return string
+   */
   protected function getDefaultReplacementFormat() {
 
     switch ($this->argument_wrapper->getGranularity()) {
@@ -80,8 +85,14 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
+    if (!isset($this->argument_wrapper)) {
+      return;
+    }
     // We can't set default in defineOptions because argument is not set yet.
     if ($this->options['replacement_format']) {
       $default = $this->options['replacement_format'];
@@ -96,7 +107,6 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
       // @todo Better description and link
       '#description' => $this->t('Provide a date pattern to be used when replace this arguments as a title.'),
     ];
-    return $form;
   }
 
 
