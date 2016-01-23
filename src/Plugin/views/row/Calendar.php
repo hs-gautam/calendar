@@ -430,23 +430,8 @@ class Calendar extends RowPluginBase {
       $granularity = 'second';
       $increment = 1;
 
-      // @todo implement
+      // @todo implement timezone support
       if ($info['is_field']) {
-
-        // Set the date_id for the node, used to identify which field value to display for
-        // fields that have multiple values. The theme expects it to be an array.
-        $date_id = 'date_id_' . $field_name;
-        $date_delta = 'date_delta_' . $field_name;
-        if (isset($row->$date_id)) {
-          $delta = $row->$date_delta;
-          $entity->date_id = ['calendar.' . $row->$date_id . '.' . $field_name. '.' . $delta];
-          $delta_field = $date_delta;
-        }
-        else {
-          $delta = isset($row->$delta_field) ? $row->$delta_field : 0;
-          $entity->date_id = ['calendar.' . $id . '.' . $field_name . '.' . $delta];
-        }
-
 
         $fields = $entity->getFields();
         // Should CalendarHelper::dateViewFields() be returning this already
@@ -458,11 +443,21 @@ class Calendar extends RowPluginBase {
 //        $db_tz   = date_get_timezone_db($tz_handling, isset($item->$tz_field) ? $item->$tz_field : timezone_name_get($dateInfo->getTimezone()));
 //        $to_zone = date_get_timezone($tz_handling, isset($item->$tz_field)) ? $item->$tz_field : timezone_name_get($dateInfo->getTimezone());
 
+          $eventDeltaCount = $dateInfo->getEventDeltaCount();
+          if (!array_key_exists($id, $eventDeltaCount)) {
+            $delta = 0;
+          }
+          else {
+            $delta = $eventDeltaCount[$id] + 1;
+          }
+          $eventDeltaCount[$id] = $delta;
+          $dateInfo->setEventDeltaCount($eventDeltaCount);
+
           if (!$fieldWrapper->isEmpty()) {
 //          $item_start_date = new dateObject($item['value'], $db_tz);
-            $item_start_date = $fieldWrapper->getStartDate();
+            $item_start_date = $fieldWrapper->getStartDate($delta);
 //          $item_end_date   = array_key_exists('value2', $item) ? new dateObject($item['value2'], $db_tz) : $item_start_date;
-            $item_end_date   = $fieldWrapper->getEndDate();
+            $item_end_date   = $fieldWrapper->getEndDate($delta);
           }
         }
 

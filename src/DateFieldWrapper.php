@@ -8,10 +8,11 @@
 namespace Drupal\calendar;
 
 use Drupal\Core\Field\FieldItemList;
-use Drupal\datetime\Plugin\Field\FieldType\DateTimeItem;
 
+/**
+ * Defines wrapper class for a date field.
+ */
 class DateFieldWrapper {
-
 
   /**
    * @var \Drupal\Core\Field\FieldItemList
@@ -26,31 +27,50 @@ class DateFieldWrapper {
   }
 
   /**
+   * Getter for the start date.
+   *
+   * @param int $index
+   *   The index of the field value to be retrieved. Defaults to 0.
+   *
    * @return \DateTime
    */
-  public function getStartDate() {
+  public function getStartDate($index = 0) {
     $date = new \DateTime();
-    return $date->setTimestamp($this->getStartTimeStamp());
+    return $date->setTimestamp($this->getStartTimeStamp($index));
   }
 
   /**
+   * Getter for the end date.
+   *
+   * @param int $index
+   *   The index of the field value to be retrieved. Defaults to 0.
+   *
+   * @TODO Implement support for end date timestamps when it comes available
+   * through core/contrib.
+   *
    * @return \DateTime
    */
-  public function getEndDate() {
+  public function getEndDate($index = 0) {
     $date = new \DateTime();
-    return $date->setTimestamp($this->getEndTimeStamp());
+    return $date->setTimestamp($this->getEndTimeStamp($index));
   }
 
   /**
+   * Getter for the start timestamp.
+   *
+   * @param int $index
+   *   The index of the field value to be retrieved. Defaults to 0.
+   *
    * @return int
+   *   The start date as a UNIX timestamp.
    */
-  protected function getStartTimeStamp() {
-    $value = $this->fieldItemList->getValue()[0]['value'];
+  protected function getStartTimeStamp($index = 0) {
+    $value = $this->fieldItemList->getValue()[$index]['value'];
     $field_def = $this->fieldItemList->getFieldDefinition();
     $field_type = $field_def->getFieldStorageDefinition()->getType();
     if ($field_type == 'datetime') {
       /** @var \Drupal/datetime\Plugin\FieldType\DateTimeItem $field */
-      $field = $this->fieldItemList->get(0);
+      $field = $this->fieldItemList->get($index);
       // Set User's Timezone
       $field->date->setTimezone(timezone_open(drupal_get_user_timezone()));
       // Format to timestamp.
@@ -60,10 +80,19 @@ class DateFieldWrapper {
   }
 
   /**
+   * Getter for the end timestamp
+   *
+   * @param int $index
+   *   The index of the field value to be retrieved. Defaults to 0.
+   *
+   * @TODO Implement support for end date timestamps when it comes available
+   * through core/contrib.
+   *
    * @return int
+   *   The end date as a UNIX timestamp.
    */
-  protected function getEndTimeStamp() {
-    return $this->getStartTimeStamp();
+  protected function getEndTimeStamp($index = 0) {
+    return $this->getStartTimeStamp($index);
   }
 
   /**
