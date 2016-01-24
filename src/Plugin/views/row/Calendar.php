@@ -173,7 +173,7 @@ class Calendar extends RowPluginBase {
       '#description' => $this->t('Add stripes to calendar items.'),
       '#type' => 'select',
       '#options' => $options,
-      '#empty_value' => $this->t('None'),
+      '#empty_value' => (string) $this->t('None'),
       '#default_value' => $this->options['colors']['legend'],
     ];
 
@@ -221,7 +221,7 @@ class Calendar extends RowPluginBase {
         '#title' => t('Term field'),
         '#type' => !empty($vocabulary_field_options) ? 'select' : 'hidden',
         '#default_value' => $this->options['colors']['taxonomy_field'],
-        '#empty_value' => $this->t('None'),
+        '#empty_value' => (string) $this->t('None'),
         '#description' => $this->t("Select the taxonomy term field to use when setting stripe colors. This works best for vocabularies with only a limited number of possible terms."),
         '#options' => $vocabulary_field_options,
         // @todo Is this in the form api?
