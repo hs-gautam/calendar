@@ -1270,7 +1270,7 @@ class Calendar extends StylePluginBase {
     }
 
     $content = [
-      'date' => $current_day_date,
+      '#date' => $current_day_date,
       'datebox' => [
         '#theme' => 'calendar_datebox',
         '#date' => $current_day_date,
@@ -1279,7 +1279,7 @@ class Calendar extends StylePluginBase {
         '#selected' => $selected,
       ],
       '#empty' => $empty,
-      'link' => $link,
+      '#link' => $link,
       'all_day' => $all_day,
       'items' => $inner,
     ];

@@ -265,7 +265,7 @@ function template_preprocess_calendar_day(&$vars) {
     $variables = array(
       'start_time' => $start_time,
       'next_start_time' => $next_start_time,
-      'curday_date' => $rows['date'],
+      'curday_date' => $rows['#date'],
     );
 
     $heading = template_preprocess_calendar_time_row_heading($variables);
