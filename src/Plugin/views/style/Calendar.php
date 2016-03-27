@@ -686,7 +686,7 @@ class Calendar extends StylePluginBase {
                 '#date' => $current_day_date,
                 '#view' => $this->view,
                 '#items' => $this->items,
-                '#selected' => $in_month,
+                '#selected' =>  ($in_month) ? (bool) (count($multiday_buckets[$week_day]) + count($singleday_buckets[$week_day])) : FALSE,
               ],
               'colspan' => 1,
               'rowspan' => 1,
