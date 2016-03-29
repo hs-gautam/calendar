@@ -5,8 +5,6 @@
  * Provides views data for the calendar module.
  */
 
-use Drupal\field\FieldStorageConfigInterface;
-
 /**
  * Implements hook_views_data_alter().
  */
