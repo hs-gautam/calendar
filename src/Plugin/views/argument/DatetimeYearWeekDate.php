@@ -4,11 +4,9 @@
  * Contains \Drupal\calendar\Plugin\views\argument\YearWeekDate.
  */
 
-
 namespace Drupal\calendar\Plugin\views\argument;
 
-
-use Drupal\datetime\Plugin\views\Argument\Date as DateTimeDate;
+use Drupal\datetime\Plugin\views\argument\Date as DateTimeDate;
 
 /**
  * Argument handler for a day.
@@ -21,7 +19,5 @@ class DatetimeYearWeekDate extends DateTimeDate{
    * {@inheritdoc}
    */
   protected $argFormat = 'YW';
-
-
 
 }
