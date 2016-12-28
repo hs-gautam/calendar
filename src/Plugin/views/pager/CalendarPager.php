@@ -26,8 +26,8 @@ use Drupal\views\ViewExecutable;
  */
 class CalendarPager extends PagerPluginBase {
 
-  const NEXT = 'next';
-  const PREVIOUS = 'previous';
+  const NEXT = '+';
+  const PREVIOUS = '-';
   /**
    * @var \Drupal\calendar\DateArgumentWrapper;
    */
@@ -49,10 +49,10 @@ class CalendarPager extends PagerPluginBase {
       return [];
     }
     $items['previous'] = [
-      'url' => $this->getPagerURL(self::PREVIOUS, $input),
+      'url' => $this->getPagerURL($this::PREVIOUS, $input),
     ];
     $items['next'] = [
-      'url' => $this->getPagerURL(self::NEXT, $input),
+      'url' => $this->getPagerURL($this::NEXT, $input),
     ];
     return array(
       '#theme' => $this->themeFunctions(),
@@ -71,17 +71,7 @@ class CalendarPager extends PagerPluginBase {
    */
   protected function getPagerArgValue($mode) {
     $datetime = $this->argument->createDateTime();
-    $granularity = $this->argument->getGranularity();
-
-    // Exception for days, which need to be handled by using a +1.
-    if ($granularity === 'day') {
-      $mode = ($mode === self::NEXT) ? '+' : '-';
-      $datetime->modify("{$mode}1 {$granularity}");
-    }
-    else {
-      // "first day of next|previous month|week|year".
-      $datetime->modify("first day of {$mode} {$granularity}");
-    }
+    $datetime->modify($mode . '1 ' . $this->argument->getGranularity());
     return $datetime->format($this->argument->getArgFormat());
   }
 
@@ -113,7 +103,7 @@ class CalendarPager extends PagerPluginBase {
       }
       $current_position++;
     }
-
+    
     // @todo How do you get display_id here so we can use CalendarHelper::getViewsURL
     return Url::fromUri('internal:/' . $base_path . '/' . implode('/', $arg_vals), ['query' => $input]);
   }
