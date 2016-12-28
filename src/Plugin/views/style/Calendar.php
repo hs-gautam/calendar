@@ -971,7 +971,7 @@ class Calendar extends StylePluginBase {
       $rows[$week][] = [
         'data' => $week_number,
         'class' => 'mini week',
-        'id' => $this->view->name . '-weekno-' . $current_day_date,
+        'id' => $this->view->id() . '-weekno-' . $current_day_date,
       ];
     }
 
