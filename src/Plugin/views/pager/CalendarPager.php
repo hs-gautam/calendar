@@ -1,9 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\calendar\Plugin\views\pager\CalendarPager.
- */
-
 
 namespace Drupal\calendar\Plugin\views\pager;
 

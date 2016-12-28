@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\calendar\Plugin\views\style\Calendar.
- */
-
 namespace Drupal\calendar\Plugin\views\style;
 
 use Drupal\calendar\CalendarDateInfo;
