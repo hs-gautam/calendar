@@ -9,9 +9,7 @@
     "source": "http://cgit.drupalcode.org/calendar"
   },
   "require": {
-    "drupal/datetime": "8.*",
-    "drupal/views": "8.*",
-    "drupal/views_templates": "8.*"
+    "drupal/views_templates": "1.*"
   },
   "license": "GPL-2.0+"
 }
