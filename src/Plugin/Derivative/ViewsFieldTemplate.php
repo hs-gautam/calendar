@@ -143,7 +143,7 @@ class ViewsFieldTemplate implements ContainerDeriverInterface {
     $field_storages = $this->field_manager->getFieldStorageDefinitions($entity_type->id());
 
     foreach ($field_storages as $field_id => $field_storage) {
-      if ($field_storage->getType() == 'datetime') {
+      if ($field_storage->getType() == 'datetime' || $field_storage->getType() == 'daterange') {
         $entity_type_id = $entity_type->id();
         // Find better way to get table name.
         $field_table = $entity_type_id . '__' . $field_id;
