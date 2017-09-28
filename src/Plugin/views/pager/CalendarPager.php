@@ -90,6 +90,7 @@ class CalendarPager extends PagerPluginBase {
     $value = $this->getPagerArgValue($mode);
     $current_position = 0;
     $arg_vals = [];
+
     /**
      * @var \Drupal\views\Plugin\views\argument\ArgumentPluginBase $handler
      */
