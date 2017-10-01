@@ -81,18 +81,18 @@ class Calendar extends StylePluginBase {
    *
    * Example:
    * @code
-   * $items = array(
-   *   "2015-10-20" => array(
-   *     "00:00:00" => array(
+   * $items = [
+   *   "2015-10-20" => [
+   *     "00:00:00" => [
    *        0 => Drupal\calendar\CalendarEvent,
-   *      ),
-   *   ),
-   *   "2015-10-21" => array(
-   *     "00:00:00" => array(
+   *      ],
+   *   ],
+   *   "2015-10-21" => [
+   *     "00:00:00" => [
    *        0 => Drupal\calendar\CalendarEvent,
-   *      ),
-   *   ),
-   * );
+   *      ],
+   *   ],
+   * ];
    * @endcode
    *
    * @var array

@@ -77,7 +77,7 @@ class CalendarValidator extends ArgumentValidatorPluginBase {
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
-    $options['replacement_format'] = array('default' => '');
+    $options['replacement_format'] = ['default' => ''];
     return $options;
   }
 

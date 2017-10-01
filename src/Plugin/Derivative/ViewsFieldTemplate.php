@@ -20,7 +20,7 @@ class ViewsFieldTemplate implements ContainerDeriverInterface {
    *
    * @var array
    */
-  protected $derivatives = array();
+  protected $derivatives = [];
 
   /**
    * The base plugin ID.

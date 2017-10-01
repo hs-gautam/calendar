@@ -495,12 +495,12 @@ class Calendar extends RowPluginBase {
 //
 // @see https://www.drupal.org/node/2195739
 // $event->rendered = theme($this->theme_functions(),
-//       array(
+//       [
 //         'view' => $this->view,
 //         'options' => $this->options,
 //         'row' => $row,
 //         'field_alias' => isset($this->field_alias) ? $this->field_alias : '',
-//       ));
+//       ]);
 
       /** @var \Drupal\calendar\CalendarEvent[] $events */
       $events = $this->explode_values($event);
@@ -680,7 +680,7 @@ class Calendar extends RowPluginBase {
     return [
       '#states' => [
         'visible' => [
-          ':input[name="row_options[colors][legend]"]' => array('value' => $mode),
+          ':input[name="row_options[colors][legend]"]' => ['value' => $mode],
         ],
       ],
     ];

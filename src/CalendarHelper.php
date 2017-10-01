@@ -476,10 +476,10 @@ class CalendarHelper extends DateHelper {
         $grans = ['year', 'month', 'day', 'hour', 'minute', 'second'];
         $granularity = !empty($field['granularity']) ? $field['granularity'] : $grans;
 
-//        $fromto = array(
+//        $fromto = [
 //          $table_name . '.' . $db_info['columns'][$table_name]['value'],
 //          $table_name . '.' . (!empty($field['settings']['todate']) ? $db_info['columns'][$table_name]['value2'] : $db_info['columns'][$table_name]['value']),
-//        );
+//        ];
 
 //        if (isset($field['settings']['tz_handling'])) {
 //          $tz_handling = $field['settings']['tz_handling'];
@@ -487,18 +487,18 @@ class CalendarHelper extends DateHelper {
 //          if ($tz_handling == 'date') {
 //            $offset_field = $table_name . '.' . $db_info['columns'][$table_name]['offset'];
 //          }
-//          $related_fields = array(
+//          $related_fields = [
 //            $table_name . '.' . $db_info['columns'][$table_name]['value'],
-//          );
+//          ];
 //          if (isset($db_info['columns'][$table_name]['value2'])) {
-//            $related_fields = array_merge($related_fields, array($table_name . '.' . $db_info['columns'][$table_name]['value2']));
+//            $related_fields = array_merge($related_fields, [$table_name . '.' . $db_info['columns'][$table_name]['value2']]);
 //          }
 //          if (isset($db_info['columns'][$table_name]['timezone'])) {
-//            $related_fields = array_merge($related_fields, array($table_name . '.' . $db_info['columns'][$table_name]['timezone']));
+//            $related_fields = array_merge($related_fields, [$table_name . '.' . $db_info['columns'][$table_name]['timezone']]);
 //            $timezone_field = $table_name . '.' . $db_info['columns'][$table_name]['timezone'];
 //          }
 //          if (isset($db_info['columns'][$table_name]['rrule'])) {
-//            $related_fields = array_merge($related_fields, array($table_name . '.' . $db_info['columns'][$table_name]['rrule']));
+//            $related_fields = array_merge($related_fields, [$table_name . '.' . $db_info['columns'][$table_name]['rrule']]);
 //            $rrule_field = $table_name . '.' . $db_info['columns'][$table_name]['rrule'];
 //          }
 //        }
@@ -678,7 +678,7 @@ class CalendarHelper extends DateHelper {
       }
     }
     return $all_fields;
-//    return array();
+//    return [];
   }
 
   /**
@@ -739,7 +739,7 @@ class CalendarHelper extends DateHelper {
    * Limits a date format to include only elements from a given granularity array.
    *
    * Example:
-   *   DateGranularity::limitFormat('F j, Y - H:i', array('year', 'month', 'day'));
+   *   DateGranularity::limitFormat('F j, Y - H:i', ['year', 'month', 'day']);
    *   returns 'F j, Y'
    *
    * @param string $format
@@ -754,19 +754,19 @@ class CalendarHelper extends DateHelper {
     // If punctuation has been escaped, remove the escaping. Done using strtr()
     // because it is easier than getting the escape character extracted using
     // preg_replace().
-    $replace = array(
+    $replace = [
       '\-' => '-',
       '\:' => ':',
       "\'" => "'",
       '\. ' => ' . ',
       '\,' => ',',
-    );
+    ];
     $format = strtr($format, $replace);
 
     $format = str_replace('\T', ' ', $format);
     $format = str_replace('T', ' ', $format);
 
-    $regex = array();
+    $regex = [];
     // Create regular expressions to remove selected values from string.
     // Use (?<!\\\\) to keep escaped letters from being removed.
     foreach ($array as $element) {
@@ -801,7 +801,7 @@ class CalendarHelper extends DateHelper {
     $regex[] = '(\|\|)';
 
     // Remove selected values from string.
-    $format = trim(preg_replace($regex, array(), $format));
+    $format = trim(preg_replace($regex, [], $format));
     // Remove orphaned punctuation at the beginning of the string.
     $format = preg_replace('`^([\-/\.,:\'])`', '', $format);
     // Remove orphaned punctuation at the end of the string.

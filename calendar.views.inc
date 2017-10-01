@@ -18,13 +18,13 @@ function calendar_views_data_alter(array &$data) {
       }
     }
   }
-  $data['views']['calendar_header'] = array(
+  $data['views']['calendar_header'] = [
     'title' => t('Calendar Header'),
     'help' => t('Calendar heading or pager.'),
-    'area' => array(
+    'area' => [
       'id' => 'calendar_header',
-    ),
-  );
+    ],
+  ];
 
 }
 
