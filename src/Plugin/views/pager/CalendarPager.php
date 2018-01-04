@@ -39,6 +39,7 @@ class CalendarPager extends PagerPluginBase {
   public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
     parent::init($view, $display, $options);
     $this->argument = CalendarHelper::getDateArgumentHandler($this->view);
+    $this->setItemsPerPage(0);
   }
 
   /**
