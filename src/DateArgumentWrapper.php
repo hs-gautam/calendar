@@ -199,7 +199,7 @@ class DateArgumentWrapper {
     if ($this->getArgFormat() == 'YW') {
       $info = $this->getYearWeek($value);
       // Find the max week for a year. Some years start a 53rd week.
-      $max_week = gmdate("W", strtotime("31 December {$info['year']}"));
+      $max_week = gmdate("W", strtotime("28 December {$info['year']}"));
       return $info['week'] >= 1 && $info['week'] <= $max_week;
 
     }
