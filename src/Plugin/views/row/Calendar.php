@@ -17,6 +17,7 @@ use Drupal\views\Plugin\views\row\RowPluginBase;
 use Drupal\views\ViewExecutable;
 use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Component\Datetime\DateTimePlus;
 
 /**
  * Plugin which creates a view on the resulting object and formats it as a
@@ -442,14 +443,22 @@ class Calendar extends RowPluginBase {
 //        $db_tz   = date_get_timezone_db($tz_handling, isset($item->$tz_field) ? $item->$tz_field : timezone_name_get($dateInfo->getTimezone()));
 //        $to_zone = date_get_timezone($tz_handling, isset($item->$tz_field) ? $item->$tz_field : timezone_name_get($dateInfo->getTimezone()));
 //        $item_start_date = new dateObject($item, $db_tz);
-        $item_start_date = new \DateTime($item[0]['value']);
+        $iSDate = $item[0]['value'] . ' +0';
+        $item_start_date = new \DateTime($iSDate);
+
+        $item_start_date->setTimezone(new \DateTimeZone('Asia/Tokyo'));
+        $item_start_date->format('Y-m-d\TH:i:s');
 
         if (!empty($item[0]['end_value'])) {
-          $item_end_date = new \DateTime($item[0]['end_value']);
+          $iEDate = $item[0]['end_value'] . ' +0';
+          $item_end_date = new \DateTime($iEDate);
         }
         else {
           $item_end_date = $item_start_date;
         }
+        $item_end_date->setTimezone(new \DateTimeZone('Asia/Tokyo'));
+        $item_end_date->format('Y-m-d\TH:i:s');
+
         $entity->date_id = array('calendar.' . $id . '.' . $field_name . '.0');
       }
 
