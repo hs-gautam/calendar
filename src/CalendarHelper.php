@@ -900,6 +900,10 @@ class CalendarHelper extends DateHelper {
    */
   static function getViewsURL(ViewExecutable $view, $display_id, $args = []) {
     $route_parameters = static::getViewRouteParameters($args);
+    // Avoid exception if current display is not a page
+    if (substr($display_id, 0, 4) != 'page'){
+      $display_id = 'page_'. $view->style_plugin->options['calendar_type'];
+    }
     $route_name = static::getDisplayRouteName($view->id(), $display_id);
     return Url::fromRoute($route_name, $route_parameters);
   }
